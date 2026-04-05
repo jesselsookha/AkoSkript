@@ -257,6 +257,60 @@
   margin-bottom: 6px;
 }
 
+/* ── Additional line types from runner.js ─────────────────── */
+
+/* Raw error line (no auto-prefix — renderErrorBlock adds its own) */
+.t-line.t-error-raw {
+  color: var(--text-error);
+  background: rgba(188, 71, 73, 0.08);
+  border-left: 3px solid var(--blushed-brick);
+  padding-left: 10px;
+  margin: 4px 0;
+}
+
+/* Dim / debug output */
+.t-line.t-dim {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* Table output — monospace pre-formatted */
+.t-line.t-table {
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: pre;
+  font-family: var(--font-mono);
+}
+
+/* console.group label */
+.t-line.t-group-label {
+  color: var(--text-secondary);
+  font-weight: bold;
+  margin-top: 4px;
+}
+.t-line.t-group-end {
+  border-top: 1px dashed var(--border-dim);
+  margin: 4px 0;
+  display: block;
+  height: 4px;
+}
+
+/* Banner fail variant */
+.t-banner.t-banner-fail {
+  color: var(--text-error);
+  opacity: 0.8;
+}
+
+/* kbd styling inside terminal empty state */
+kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border-dim);
+  padding: 1px 4px;
+}
+
 /* ── Run separator line ────────────────────────────────────── */
 .t-separator {
   display: block;

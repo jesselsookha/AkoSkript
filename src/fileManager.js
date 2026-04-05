@@ -14,15 +14,13 @@ const STORAGE_INDEX_KEY  = 'akoskript_index';
 // ── Get current editor content ────────────────────────────────
 function getEditorContent() {
   if (!AppState.editorInstance) return '';
+  // editorInstance is a CodeMirror EditorView
   return AppState.editorInstance.state.doc.toString();
 }
 
 // ── Set editor content ────────────────────────────────────────
 function setEditorContent(content) {
   if (!AppState.editorInstance) return;
-  const { EditorView } = window._CM_MODULES_ || {};
-  if (!EditorView) return;
-
   AppState.editorInstance.dispatch({
     changes: {
       from: 0,
