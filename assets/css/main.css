@@ -1,0 +1,401 @@
+/* ============================================================
+   AKO SKRIPT — main.css
+   Global styles, CSS variables, retro-terminal theme
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* ── CSS Custom Properties ─────────────────────────────────── */
+:root {
+  /* Brand Palette */
+  --hunter-green:   #386641;
+  --sage-green:     #6a994e;
+  --yellow-green:   #a7c957;
+  --vanilla-cream:  #f2e8cf;
+  --blushed-brick:  #bc4749;
+
+  /* Terminal / UI derived colours */
+  --bg-base:        #1a1f1a;          /* near-black green-tinted background */
+  --bg-panel:       #1e2a1e;          /* panel backgrounds */
+  --bg-panel-alt:   #232e23;          /* slightly lighter panel */
+  --bg-terminal:    #111711;          /* darkest — terminal output area */
+  --bg-teachable:   #2a3320;          /* teachable error message background */
+  --bg-input-line:  #0d120d;          /* input prompt line */
+
+  --border-primary: #386641;          /* hunter-green borders */
+  --border-dim:     #2a3d2a;          /* subtle borders */
+  --border-bright:  #6a994e;          /* highlighted borders */
+
+  --text-primary:   #a7c957;          /* yellow-green — main terminal text */
+  --text-secondary: #6a994e;          /* sage-green — secondary text */
+  --text-dim:       #4a6b4a;          /* muted labels */
+  --text-cream:     #f2e8cf;          /* vanilla-cream — headings, UI labels */
+  --text-error:     #e05a5c;          /* brighter brick for errors */
+  --text-warn:      #d4a843;          /* amber for warnings */
+  --text-info:      #5aaccc;          /* blue for info */
+  --text-success:   #a7c957;          /* same as primary — success */
+  --text-teachable: #f2e8cf;          /* cream on dark green for teachable */
+
+  /* Scanline / CRT effect */
+  --scanline-opacity: 0.04;
+
+  /* Typography */
+  --font-display:   'VT323', monospace;
+  --font-mono:      'Share Tech Mono', 'Courier Prime', monospace;
+  --font-ui:        'Courier Prime', monospace;
+
+  /* Sizing */
+  --titlebar-h:     38px;
+  --toolbar-h:      44px;
+  --statusbar-h:    26px;
+  --panel-gap:      3px;
+  --border-w:       2px;
+
+  /* Shadows — inset bevel for retro look */
+  --shadow-bevel-out: inset 1px 1px 0 #4a7a4a, inset -1px -1px 0 #0d150d;
+  --shadow-bevel-in:  inset 1px 1px 0 #0d150d, inset -1px -1px 0 #4a7a4a;
+  --shadow-panel:     2px 2px 8px rgba(0,0,0,0.6);
+}
+
+/* ── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: none;          /* intentional — keeps pixel feel */
+  image-rendering: pixelated;
+}
+
+/* ── CRT Scanline Overlay ──────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 4px
+  );
+}
+
+/* ── App Shell ─────────────────────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Title Bar ─────────────────────────────────────────────── */
+#titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--titlebar-h);
+  padding: 0 12px;
+  background: var(--hunter-green);
+  border-bottom: var(--border-w) solid var(--border-bright);
+  box-shadow: var(--shadow-bevel-out);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+#titlebar .title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#titlebar .app-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--vanilla-cream);
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(167,201,87,0.4);
+}
+
+#titlebar .app-tagline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--yellow-green);
+  opacity: 0.75;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+
+#titlebar .title-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Current mode badge */
+#mode-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--bg-base);
+  background: var(--yellow-green);
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-bevel-out);
+}
+
+/* ── Toolbar ───────────────────────────────────────────────── */
+#toolbar {
+  display: flex;
+  align-items: center;
+  height: var(--toolbar-h);
+  padding: 0 8px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-dim);
+  gap: 4px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-bevel-out);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  border-right: 1px solid var(--border-dim);
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+  margin-left: auto;
+}
+
+/* Toolbar Buttons */
+.btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-cream);
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border-primary);
+  padding: 4px 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-bevel-out);
+  transition: background 0.05s, color 0.05s;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--sage-green);
+  color: var(--bg-base);
+  box-shadow: var(--shadow-bevel-in);
+}
+
+.btn:active {
+  box-shadow: var(--shadow-bevel-in);
+  transform: translateY(1px);
+}
+
+.btn-run {
+  background: var(--hunter-green);
+  border-color: var(--yellow-green);
+  color: var(--yellow-green);
+  font-weight: bold;
+}
+
+.btn-run:hover {
+  background: var(--yellow-green);
+  color: var(--bg-base);
+}
+
+.btn-danger {
+  border-color: var(--blushed-brick);
+  color: var(--text-error);
+}
+
+.btn-danger:hover {
+  background: var(--blushed-brick);
+  color: var(--vanilla-cream);
+}
+
+.btn-mode {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+/* ── Main Content Area ─────────────────────────────────────── */
+#main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Status Bar ────────────────────────────────────────────── */
+#statusbar {
+  display: flex;
+  align-items: center;
+  height: var(--statusbar-h);
+  padding: 0 10px;
+  background: var(--hunter-green);
+  border-top: 1px solid var(--border-bright);
+  gap: 16px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--vanilla-cream);
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+#statusbar .status-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.85;
+}
+
+#statusbar .status-item.right {
+  margin-left: auto;
+}
+
+#statusbar .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--yellow-green);
+  box-shadow: 0 0 4px var(--yellow-green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Resizable Divider ─────────────────────────────────────── */
+.panel-divider {
+  width: var(--panel-gap);
+  background: var(--border-primary);
+  cursor: col-resize;
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.1s;
+}
+
+.panel-divider:hover,
+.panel-divider.dragging {
+  background: var(--yellow-green);
+}
+
+.panel-divider::after {
+  content: '⠿';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-dim);
+  font-size: 10px;
+  writing-mode: vertical-lr;
+  letter-spacing: 2px;
+}
+
+/* ── Scrollbars (WebKit) ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-terminal);
+  border-left: 1px solid var(--border-dim);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hunter-green);
+  border: 1px solid var(--border-bright);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sage-green);
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection {
+  background: var(--sage-green);
+  color: var(--bg-base);
+}
+
+/* ── Utility Classes ───────────────────────────────────────── */
+.hidden   { display: none !important; }
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+}
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Panel Labels (shared) ─────────────────────────────────── */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--bg-panel-alt);
+  border-bottom: 1px solid var(--border-dim);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  user-select: none;
+  box-shadow: var(--shadow-bevel-out);
+}
+
+.panel-header .panel-label {
+  color: var(--text-secondary);
+}
+
+.panel-header .panel-actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* Panel corner "traffic lights" — retro fake OS chrome */
+.panel-corner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 0;             /* square — retro, not macOS */
+  display: inline-block;
+  margin-right: 2px;
+}
+.dot-green  { background: var(--sage-green); }
+.dot-yellow { background: var(--yellow-green); }
+.dot-red    { background: var(--blushed-brick); }

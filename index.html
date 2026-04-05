@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ako Skript — Learn Through Code</title>
+  <meta name="description" content="A browser-based code editor for learning JavaScript, TypeScript, and HTML/CSS/JS development." />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/terminal.css" />
+  <link rel="stylesheet" href="assets/css/editor.css" />
+
+  <!-- CodeMirror 6 via CDN (ESM bundle — loaded as module in app.js) -->
+  <!-- TypeScript compiler via CDN -->
+  <script src="https://unpkg.com/typescript@5.4.5/lib/typescript.js" defer></script>
+</head>
+
+<body>
+
+  <!-- ════════════════════════════════════════════════════════
+       WELCOME / MODE SELECTION OVERLAY
+       Shown on first load and when switching modes
+       ════════════════════════════════════════════════════════ -->
+  <div id="welcome-overlay" role="dialog" aria-modal="true" aria-label="Select coding mode">
+
+    <div class="welcome-backdrop"></div>
+
+    <div class="welcome-modal">
+
+      <!-- Modal Title Bar -->
+      <div class="welcome-titlebar">
+        <div class="welcome-titlebar-dots">
+          <span class="panel-corner-dot dot-red"></span>
+          <span class="panel-corner-dot dot-yellow"></span>
+          <span class="panel-corner-dot dot-green"></span>
+        </div>
+        <span class="welcome-titlebar-text">AKO SKRIPT v1.0</span>
+        <span class="welcome-titlebar-right">SELECT MODE</span>
+      </div>
+
+      <!-- Logo / Branding -->
+      <div class="welcome-brand">
+        <div class="brand-logo">
+          <span class="brand-ako">AKO</span><span class="brand-skript">SKRIPT</span>
+        </div>
+        <div class="brand-tagline">
+          <span class="blink-cursor"></span>
+          <span class="tagline-text">Learn. Write. Execute.</span>
+        </div>
+        <div class="brand-subtitle">Choose your environment to begin</div>
+      </div>
+
+      <!-- Mode Cards -->
+      <div class="mode-grid" role="list">
+
+        <!-- JavaScript Mode -->
+        <button class="mode-card" data-mode="javascript" role="listitem" aria-label="JavaScript editor mode">
+          <div class="mode-card-inner">
+            <div class="mode-icon">JS</div>
+            <div class="mode-info">
+              <div class="mode-title">JavaScript</div>
+              <div class="mode-desc">Editor + terminal console.<br>Run JS code with live output.</div>
+            </div>
+            <div class="mode-badge">CONSOLE</div>
+          </div>
+          <div class="mode-card-glow"></div>
+        </button>
+
+        <!-- TypeScript Mode -->
+        <button class="mode-card" data-mode="typescript" role="listitem" aria-label="TypeScript editor mode">
+          <div class="mode-card-inner">
+            <div class="mode-icon">TS</div>
+            <div class="mode-info">
+              <div class="mode-title">TypeScript</div>
+              <div class="mode-desc">Typed JS with in-browser<br>compilation and error checks.</div>
+            </div>
+            <div class="mode-badge">TYPED</div>
+          </div>
+          <div class="mode-card-glow"></div>
+        </button>
+
+        <!-- HTML/CSS/JS Split Mode -->
+        <button class="mode-card mode-card-wide" data-mode="split" role="listitem" aria-label="HTML CSS JS split editor mode">
+          <div class="mode-card-inner">
+            <div class="mode-icon mode-icon-split">
+              <span>H</span><span>C</span><span>J</span>
+            </div>
+            <div class="mode-info">
+              <div class="mode-title">HTML · CSS · JS</div>
+              <div class="mode-desc">Three editors + live preview. Build full web pages in the browser.</div>
+            </div>
+            <div class="mode-badge mode-badge-split">PREVIEW</div>
+          </div>
+          <div class="mode-card-glow"></div>
+        </button>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="welcome-footer">
+        <span class="welcome-footer-text">
+          Ako (ɑːkɔ) · Māori — <em>to learn and to teach, simultaneously</em>
+        </span>
+      </div>
+
+    </div><!-- /.welcome-modal -->
+  </div><!-- /#welcome-overlay -->
+
+
+  <!-- ════════════════════════════════════════════════════════
+       MAIN APP SHELL
+       Hidden until a mode is selected
+       ════════════════════════════════════════════════════════ -->
+  <div id="app" class="hidden">
+
+    <!-- Title Bar -->
+    <header id="titlebar" role="banner">
+      <div class="title-left">
+        <span class="app-name">AKO SKRIPT</span>
+        <span class="app-tagline">Learn Through Code</span>
+      </div>
+      <div class="title-right">
+        <span id="mode-badge" aria-label="Current mode">JAVASCRIPT</span>
+      </div>
+    </header>
+
+    <!-- Toolbar -->
+    <nav id="toolbar" role="toolbar" aria-label="Editor controls">
+
+      <!-- File Group -->
+      <div class="toolbar-group" aria-label="File operations">
+        <button class="btn" id="btn-new"    title="New file (Ctrl+N)">New</button>
+        <button class="btn" id="btn-open"   title="Open file (Ctrl+O)">Open</button>
+        <button class="btn" id="btn-save"   title="Save file (Ctrl+S)">Save</button>
+      </div>
+
+      <!-- Run Group -->
+      <div class="toolbar-group" aria-label="Execution controls">
+        <button class="btn btn-run" id="btn-run"   title="Run code (Ctrl+Enter)">▶ Run</button>
+        <button class="btn btn-danger" id="btn-clear" title="Clear terminal output">✕ Clear</button>
+      </div>
+
+      <!-- Mode Switch Group (right-aligned) -->
+      <div class="toolbar-group" aria-label="Mode switcher">
+        <span style="font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-right:4px;">Mode:</span>
+        <button class="btn btn-mode mode-switch-btn active-mode" data-mode="javascript" title="Switch to JavaScript mode">JS</button>
+        <button class="btn btn-mode mode-switch-btn" data-mode="typescript"              title="Switch to TypeScript mode">TS</button>
+        <button class="btn btn-mode mode-switch-btn" data-mode="split"                   title="Switch to HTML/CSS/JS split mode">H·C·J</button>
+      </div>
+
+    </nav>
+
+    <!-- Main Content — panels rendered here by JS -->
+    <main id="main-content" role="main" aria-label="Editor workspace">
+      <!-- Populated dynamically by src/modes/jsMode.js, tsMode.js, splitMode.js -->
+    </main>
+
+    <!-- Status Bar -->
+    <footer id="statusbar" role="contentinfo">
+      <div class="status-item">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="status-mode">JAVASCRIPT</span>
+      </div>
+      <div class="status-item">
+        <span id="status-filename">untitled.js</span>
+      </div>
+      <div class="status-item">
+        <span id="status-cursor">Ln 1, Col 1</span>
+      </div>
+      <div class="status-item right">
+        <span id="status-msg">Ready</span>
+      </div>
+    </footer>
+
+  </div><!-- /#app -->
+
+
+  <!-- Hidden file input for Open dialog -->
+  <input type="file" id="file-input" accept=".js,.ts,.html,.css,.json,.akoskript" class="visually-hidden" aria-hidden="true" />
+
+
+  <!-- ════════════════════════════════════════════════════════
+       WELCOME OVERLAY STYLES (scoped here to keep self-contained)
+       ════════════════════════════════════════════════════════ -->
+  <style>
+    /* Overlay backdrop */
+    #welcome-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .welcome-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-base);
+      /* Subtle grid pattern — retro graph paper feel */
+      background-image:
+        linear-gradient(rgba(56,102,65,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,102,65,0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    /* Modal window */
+    .welcome-modal {
+      position: relative;
+      z-index: 1;
+      width: min(680px, 94vw);
+      background: var(--bg-panel);
+      border: var(--border-w) solid var(--border-bright);
+      box-shadow:
+        var(--shadow-bevel-out),
+        0 0 60px rgba(56,102,65,0.3),
+        0 0 120px rgba(56,102,65,0.1);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    /* Modal title bar — DOS window chrome */
+    .welcome-titlebar {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 10px;
+      background: var(--hunter-green);
+      border-bottom: 1px solid var(--border-bright);
+      user-select: none;
+    }
+    .welcome-titlebar-dots { display: flex; gap: 5px; margin-right: 10px; }
+    .welcome-titlebar-text {
+      flex: 1;
+      font-family: var(--font-display);
+      font-size: 16px;
+      color: var(--vanilla-cream);
+      letter-spacing: 2px;
+    }
+    .welcome-titlebar-right {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--yellow-green);
+      letter-spacing: 1.5px;
+      opacity: 0.8;
+    }
+
+    /* Branding area */
+    .welcome-brand {
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid var(--border-dim);
+      text-align: center;
+    }
+
+    .brand-logo {
+      font-family: var(--font-display);
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: 6px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(167,201,87,0.4);
+    }
+    .brand-ako    { color: var(--vanilla-cream); }
+    .brand-skript { color: var(--yellow-green); }
+
+    .brand-tagline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .blink-cursor {
+      display: inline-block;
+      width: 9px;
+      height: 16px;
+      background: var(--yellow-green);
+      animation: blink 1s step-start infinite;
+      vertical-align: middle;
+    }
+
+    .tagline-text { color: var(--text-cream); }
+
+    .brand-subtitle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* Mode grid */
+    .mode-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 24px 28px;
+    }
+
+    .mode-card {
+      flex: 1;
+      min-width: 160px;
+      background: var(--bg-panel-alt);
+      border: var(--border-w) solid var(--border-dim);
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-bevel-out);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .mode-card:hover {
+      border-color: var(--sage-green);
+      box-shadow: var(--shadow-bevel-out), 0 0 16px rgba(106,153,78,0.25);
+    }
+    .mode-card:hover .mode-card-glow {
+      opacity: 1;
+    }
+    .mode-card:active {
+      box-shadow: var(--shadow-bevel-in);
+      transform: translateY(1px);
+    }
+
+    .mode-card-wide { flex: 100%; min-width: 100%; }
+
+    .mode-card-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mode-icon {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--yellow-green);
+      line-height: 1;
+      min-width: 48px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(167,201,87,0.5);
+    }
+
+    .mode-icon-split {
+      display: flex;
+      gap: 2px;
+      font-size: 28px;
+    }
+    .mode-icon-split span:nth-child(1) { color: var(--blushed-brick); }
+    .mode-icon-split span:nth-child(2) { color: #4a90d9; }
+    .mode-icon-split span:nth-child(3) { color: var(--yellow-green); }
+
+    .mode-info { flex: 1; }
+
+    .mode-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--text-cream);
+      letter-spacing: 1.5px;
+      margin-bottom: 4px;
+    }
+
+    .mode-desc {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+      letter-spacing: 0.3px;
+    }
+
+    .mode-badge {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--bg-base);
+      background: var(--sage-green);
+      padding: 2px 6px;
+      letter-spacing: 1px;
+      align-self: flex-start;
+    }
+
+    .mode-badge-split {
+      background: #4a90d9;
+    }
+
+    .mode-card-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(106,153,78,0.08) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    /* Footer */
+    .welcome-footer {
+      padding: 10px 28px 14px;
+      border-top: 1px solid var(--border-dim);
+      text-align: center;
+    }
+    .welcome-footer-text {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-dim);
+      font-style: normal;
+      letter-spacing: 0.3px;
+    }
+    .welcome-footer-text em {
+      color: var(--text-secondary);
+    }
+
+    /* Mode switcher active state in toolbar */
+    .mode-switch-btn.active-mode {
+      background: var(--hunter-green);
+      border-color: var(--yellow-green);
+      color: var(--yellow-green);
+    }
+  </style>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       SCRIPTS
+       Load order matters: app.js bootstraps everything
+       ════════════════════════════════════════════════════════ -->
+  <script type="module" src="src/app.js"></script>
+
+</body>
+</html>
