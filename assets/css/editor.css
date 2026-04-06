@@ -1,174 +1,54 @@
 /* ============================================================
    AKO SKRIPT — editor.css
-   CodeMirror 6 overrides and editor panel styles
+   CodeMirror 6 overrides, editor panel, split mode, preview
    ============================================================ */
 
-/* ── Editor Panel Container ────────────────────────────────── */
 .editor-panel {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   background: var(--bg-panel);
-  overflow: hidden;
-  position: relative;
+  overflow: hidden; position: relative;
   min-width: 0;
 }
 
-/* ── CodeMirror Host Element ───────────────────────────────── */
 .editor-panel .cm-host {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
+  flex: 1; overflow: hidden; position: relative;
 }
 
-/* ── CodeMirror 6 Core Overrides ───────────────────────────── */
+/* ── CodeMirror Core ───────────────────────────────────────── */
 .cm-editor {
-  height: 100%;
+  height: 100% !important;
   background: var(--bg-panel) !important;
   font-family: var(--font-mono) !important;
   font-size: 13.5px !important;
 }
-
-/* Remove default CM outline on focus */
-.cm-editor.cm-focused {
-  outline: none !important;
-}
-
-/* Scroller */
-.cm-scroller {
-  font-family: var(--font-mono) !important;
-  line-height: 1.65 !important;
-  overflow: auto !important;
-}
-
-/* Content area */
-.cm-content {
-  padding: 10px 0 !important;
-  caret-color: var(--yellow-green) !important;
-}
-
-/* Cursor */
-.cm-cursor,
-.cm-dropCursor {
-  border-left-color: var(--yellow-green) !important;
-  border-left-width: 2px !important;
-}
-
-/* Selection */
+.cm-editor.cm-focused { outline: none !important; }
+.cm-scroller { font-family: var(--font-mono) !important; line-height: 1.65 !important; overflow: auto !important; }
+.cm-content { padding: 10px 0 !important; caret-color: var(--yellow-green) !important; }
+.cm-cursor, .cm-dropCursor { border-left-color: var(--yellow-green) !important; border-left-width: 2px !important; }
 .cm-selectionBackground,
-.cm-focused .cm-selectionBackground {
-  background: rgba(106, 153, 78, 0.25) !important;
-}
+.cm-focused .cm-selectionBackground { background: rgba(106,153,78,0.25) !important; }
+.cm-activeLine { background: rgba(56,102,65,0.15) !important; }
+.cm-activeLineGutter { background: rgba(56,102,65,0.2) !important; }
 
-/* Active line highlight */
-.cm-activeLine {
-  background: rgba(56, 102, 65, 0.15) !important;
-}
-
-/* Active line gutter highlight */
-.cm-activeLineGutter {
-  background: rgba(56, 102, 65, 0.2) !important;
-}
-
-/* ── Gutter (Line Numbers) ─────────────────────────────────── */
+/* ── Gutter ────────────────────────────────────────────────── */
 .cm-gutters {
   background: var(--bg-panel-alt) !important;
   border-right: 1px solid var(--border-dim) !important;
   color: var(--text-dim) !important;
   min-width: 42px;
+  font-family: var(--font-ui) !important;
 }
-
-.cm-lineNumbers .cm-gutterElement {
-  padding: 0 10px 0 6px !important;
-  font-size: 11.5px !important;
-  letter-spacing: 0.3px;
-}
-
-.cm-lineNumbers .cm-gutterElement.cm-activeLineGutter {
-  color: var(--text-secondary) !important;
-}
-
-/* ── Syntax Highlighting ───────────────────────────────────── */
-/* We use the One Dark base then override with our palette */
-
-/* Keywords: if, for, const, let, var, function, class... */
-.cm-keyword     { color: var(--yellow-green) !important; }
-
-/* Strings */
-.cm-string,
-.cm-string2     { color: #c5a06e !important; }   /* warm tan */
-
-/* Numbers */
-.cm-number      { color: #8ec07c !important; }   /* muted green */
-
-/* Comments */
-.cm-comment     { color: var(--text-dim) !important; font-style: italic; }
-
-/* Variables / identifiers */
-.cm-variableName { color: var(--text-primary) !important; }
-
-/* Function names */
-.cm-function    { color: var(--sage-green) !important; }
-
-/* Operators */
-.cm-operator    { color: var(--vanilla-cream) !important; opacity: 0.8; }
-
-/* Types (TypeScript) */
-.cm-typeName    { color: #7ec8c8 !important; }   /* teal */
-
-/* Brackets / punctuation */
-.cm-bracket,
-.cm-punctuation { color: var(--text-secondary) !important; }
-
-/* Properties */
-.cm-propertyName { color: #d4b896 !important; }   /* warm sand */
-
-/* Boolean */
-.cm-bool        { color: var(--yellow-green) !important; opacity: 0.9; }
-
-/* Null / undefined */
-.cm-null        { color: var(--text-dim) !important; font-style: italic; }
-
-/* Class names */
-.cm-className   { color: #e0c07a !important; }   /* golden */
-
-/* HTML Tags */
-.cm-tagName     { color: var(--sage-green) !important; }
-.cm-attributeName { color: var(--yellow-green) !important; opacity: 0.85; }
-.cm-attributeValue { color: #c5a06e !important; }
-
-/* CSS specific */
-.cm-selector    { color: var(--yellow-green) !important; }
-.cm-property    { color: var(--text-primary) !important; }
-.cm-unit        { color: var(--text-secondary) !important; }
+.cm-lineNumbers .cm-gutterElement { padding: 0 10px 0 6px !important; font-size: 11.5px !important; }
+.cm-lineNumbers .cm-activeLineGutter { color: var(--text-secondary) !important; }
 
 /* ── Matching Brackets ─────────────────────────────────────── */
-.cm-matchingBracket {
-  background: rgba(167, 201, 87, 0.2) !important;
-  outline: 1px solid var(--yellow-green) !important;
-}
+.cm-matchingBracket { background: rgba(167,201,87,0.2) !important; outline: 1px solid var(--yellow-green) !important; }
 
-/* ── Search / Match Highlight ──────────────────────────────── */
-.cm-searchMatch {
-  background: rgba(167, 201, 87, 0.25) !important;
-  outline: 1px solid var(--sage-green) !important;
-}
-.cm-searchMatch.cm-searchMatch-selected {
-  background: rgba(167, 201, 87, 0.45) !important;
-}
+/* ── Search ────────────────────────────────────────────────── */
+.cm-searchMatch { background: rgba(167,201,87,0.25) !important; }
+.cm-searchMatch.cm-searchMatch-selected { background: rgba(167,201,87,0.45) !important; }
 
-/* ── Fold Gutter ───────────────────────────────────────────── */
-.cm-foldGutter {
-  width: 14px;
-}
-.cm-foldGutter .cm-gutterElement {
-  color: var(--text-dim) !important;
-  cursor: pointer;
-}
-.cm-foldGutter .cm-gutterElement:hover {
-  color: var(--yellow-green) !important;
-}
-
-/* ── Tooltip / Autocomplete Popup ──────────────────────────── */
+/* ── Tooltip / Autocomplete ────────────────────────────────── */
 .cm-tooltip {
   background: var(--bg-panel-alt) !important;
   border: 1px solid var(--border-primary) !important;
@@ -177,118 +57,40 @@
   font-size: 12px !important;
   box-shadow: var(--shadow-panel) !important;
 }
+.cm-tooltip-autocomplete > ul > li { padding: 3px 8px !important; color: var(--text-primary) !important; }
+.cm-tooltip-autocomplete > ul > li[aria-selected] { background: var(--hunter-green) !important; color: var(--vanilla-cream) !important; }
 
-.cm-tooltip-autocomplete > ul {
-  font-family: var(--font-mono) !important;
-  max-height: 200px;
-}
-
-.cm-tooltip-autocomplete > ul > li {
-  padding: 3px 8px !important;
-  color: var(--text-primary) !important;
-}
-
-.cm-tooltip-autocomplete > ul > li[aria-selected] {
-  background: var(--hunter-green) !important;
-  color: var(--vanilla-cream) !important;
-}
-
-.cm-completionLabel {
-  color: var(--text-primary) !important;
-}
-
-.cm-completionDetail {
-  color: var(--text-dim) !important;
-  font-style: italic;
-}
-
-/* ── Error / Lint Underline ────────────────────────────────── */
-.cm-lintRange-error {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 3 L1.5 0 L3 3 L4.5 0 L6 3' stroke='%23e05a5c' fill='none' stroke-width='1'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-position: bottom;
-}
-.cm-lintRange-warning {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='3'%3E%3Cpath d='M0 3 L1.5 0 L3 3 L4.5 0 L6 3' stroke='%23d4a843' fill='none' stroke-width='1'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-position: bottom;
-}
-
-/* ── Split Mode — Mini editor panel label ───────────────────── */
+/* ── Split Mode Panels ─────────────────────────────────────── */
 .split-editor-panel {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--border-dim);
-  background: var(--bg-panel);
-  min-height: 0;
+  background: var(--bg-panel); min-height: 0;
 }
-
 .split-editor-panel .split-panel-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 24px;
-  padding: 0 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 24px; padding: 0 8px;
   background: var(--bg-panel-alt);
   border-bottom: 1px solid var(--border-dim);
-  font-size: 10px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-family: var(--font-ui); font-size: 10px;
+  color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase;
   flex-shrink: 0;
 }
+.split-editor-panel .split-panel-label .lang-tag { color: var(--text-secondary); font-weight: bold; }
 
-.split-editor-panel .split-panel-label .lang-tag {
-  color: var(--text-secondary);
-  font-weight: bold;
-}
-
-/* ── Preview Panel (Split Mode) ────────────────────────────── */
+/* ── Preview Panel ─────────────────────────────────────────── */
 #preview-panel {
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   border: 1px solid var(--border-dim);
-  background: var(--vanilla-cream);
-  overflow: hidden;
-  min-height: 0;
+  background: #fff; overflow: hidden; min-height: 0;
 }
-
 #preview-panel .preview-header {
-  display: flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 8px;
+  display: flex; align-items: center;
+  height: 24px; padding: 0 8px;
   background: var(--bg-panel-alt);
   border-bottom: 1px solid var(--border-dim);
-  font-size: 10px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-family: var(--font-ui); font-size: 10px;
+  color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase;
   flex-shrink: 0;
 }
-
-#preview-iframe {
-  flex: 1;
-  border: none;
-  background: #fff;
-  min-height: 0;
-}
-
-/* ── File Name Display in Header ───────────────────────────── */
-.file-name-display {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-secondary);
-  padding: 0 8px;
-  opacity: 0.8;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-name-display.unsaved::after {
-  content: ' ●';
-  color: var(--yellow-green);
-}
+#preview-iframe { flex: 1; border: none; background: #fff; min-height: 0; }

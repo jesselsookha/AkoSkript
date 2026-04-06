@@ -247,7 +247,187 @@
 .terminal-empty .empty-line {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--texa/* ============================================================
+   AKO SKRIPT — terminal.css
+   Terminal / console output panel styles
+   ============================================================ */
+
+.terminal-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-terminal);
+  border-left: var(--border-w) solid var(--border-primary);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Phosphor glow */
+.terminal-panel::before {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 1;
+  box-shadow: inset 0 0 40px rgba(56,102,65,0.08);
+}
+
+/* ── Terminal Header ───────────────────────────────────────── */
+.terminal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 28px; padding: 0 10px;
+  background: var(--bg-panel-alt);
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0; user-select: none;
+  box-shadow: var(--shadow-bevel-out);
+}
+.terminal-header .terminal-label {
+  font-family: var(--font-ui);
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.terminal-header .terminal-label span { color: var(--text-secondary); }
+.terminal-controls { display: flex; gap: 4px; align-items: center; }
+
+/* ── Output Area ───────────────────────────────────────────── */
+#terminal-output {
+  flex: 1;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-primary);
+  word-break: break-word;
+  position: relative; z-index: 2;
+}
+
+/* ── Terminal Line Types ───────────────────────────────────── */
+.t-line {
+  display: block;
+  padding: 1px 0;
+  animation: fadeIn 0.08s ease-out;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.t-line.t-log   { color: var(--text-primary); }
+.t-line.t-info  { color: var(--text-info); }
+.t-line.t-warn  { color: var(--text-warn); border-left: 3px solid var(--text-warn); padding-left: 10px; margin: 2px 0; }
+.t-line.t-dim   { color: var(--text-dim); font-style: italic; }
+.t-line.t-table { color: var(--text-secondary); font-size: 12px; white-space: pre; }
+
+.t-line.t-prompt-q   { color: var(--text-secondary); }
+.t-line.t-input-echo { color: var(--vanilla-cream); opacity: 0.7; }
+.t-line.t-input-echo::before { content: '› '; color: var(--text-dim); }
+
+/* Raw error (no auto-prefix) */
+.t-line.t-error-raw {
+  color: var(--text-error);
+  background: rgba(188,71,73,0.08);
+  border-left: 3px solid var(--blushed-brick);
+  padding-left: 10px;
+  margin: 4px 0;
+}
+
+/* Legacy error class (with prefix) */
+.t-line.t-error {
+  color: var(--text-error);
+  background: rgba(188,71,73,0.08);
+  border-left: 3px solid var(--blushed-brick);
+  padding-left: 10px;
+  margin: 4px 0;
+}
+.t-line.t-error::before { content: '✖ '; font-weight: bold; }
+
+.t-line.t-group-label { color: var(--text-secondary); font-weight: bold; margin-top: 4px; }
+.t-line.t-group-end   { border-top: 1px dashed var(--border-dim); margin: 4px 0; display: block; height: 4px; }
+
+/* ── Teachable Error Block ─────────────────────────────────── */
+.t-teachable {
+  display: block;
+  margin: 6px 0 8px 0;
+  padding: 8px 12px 10px 12px;
+  background: var(--bg-teachable);
+  border: 1px solid var(--sage-green);
+  border-left: 4px solid var(--yellow-green);
+  animation: fadeIn 0.15s ease-out;
+}
+.t-teachable .teachable-header {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui); font-size: 11px;
+  color: var(--yellow-green);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 5px; opacity: 0.9;
+}
+.t-teachable .teachable-header::before { content: '◈'; font-size: 10px; }
+.t-teachable .teachable-msg {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--text-teachable); line-height: 1.6;
+}
+
+/* ── Banner lines ──────────────────────────────────────────── */
+.t-banner {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.t-banner.t-banner-start { color: var(--text-secondary); }
+.t-banner.t-banner-end   { margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-dim); }
+.t-banner.t-banner-fail  { color: var(--text-error); opacity: 0.8; }
+
+/* ── Input Line ────────────────────────────────────────────── */
+#terminal-input-line {
+  display: flex; align-items: center;
+  padding: 6px 14px;
+  background: var(--bg-input-line);
+  border-top: 1px solid var(--border-dim);
+  flex-shrink: 0; gap: 8px;
+  position: relative; z-index: 2;
+}
+#terminal-input-line .prompt-symbol {
+  font-family: var(--font-display);
+  font-size: 18px; color: var(--sage-green);
+  flex-shrink: 0; line-height: 1;
+}
+#terminal-prompt-label {
+  font-family: var(--font-ui); font-size: 12px;
+  color: var(--text-secondary); flex-shrink: 0;
+  max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#terminal-input {
+  flex: 1;
+  background: transparent; border: none; outline: none;
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--vanilla-cream);
+  caret-color: var(--yellow-green);
+  padding: 0;
+}
+#terminal-input::placeholder { color: var(--text-dim); font-style: italic; }
+
+/* ── Cursor ────────────────────────────────────────────────── */
+.t-cursor {
+  display: inline-block; width: 8px; height: 14px;
+  background: var(--yellow-green);
+  vertical-align: middle;
+  animation: blink 1s step-start infinite;
+  margin-left: 2px;
+}
+
+/* ── Empty State ───────────────────────────────────────────── */
+.terminal-empty { padding: 16px 14px; opacity: 0.45; }
+.terminal-empty .empty-line {
+  display: block;
+  font-family: var(--font-ui); font-size: 12px;
+  color: var(--text-dim); line-height: 1.9;
+}
+.terminal-empty .empty-line.em-title { color: var(--text-secondary); font-size: 13px; margin-bottom: 6px; }
+
+kbd {
+  font-family: var(--font-ui); font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border-dim);
+  padding: 1px 4px;
+}t-dim);
   line-height: 1.8;
 }
 

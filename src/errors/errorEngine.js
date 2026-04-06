@@ -1,54 +1,59 @@
 /**
  * AKO SKRIPT — errorEngine.js
- * Matches runtime errors to the teaching catalog and
- * returns enriched, teachable error objects.
- * Phase 3 full implementation.
+ * Matches runtime errors to teaching catalog entries.
+ * Phase 3 will populate the JS catalog; this engine is fully wired now.
  */
 
-// Catalogs loaded lazily in Phase 3
-// import { JSErrors }  from './jsErrors.js';
-// import { TSErrors }  from './tsErrors.js';
-// import { HTMLErrors } from './htmlErrors.js';
-// import { CSSErrors }  from './cssErrors.js';
+import { JSErrors  } from './jsErrors.js';
+import { TSErrors  } from './tsErrors.js';
 
 /**
- * Match an error to the teaching catalog.
- * @param {Error} error        - The caught error object
- * @param {string} language    - 'javascript' | 'typescript' | 'html' | 'css'
- * @param {string} sourceCode  - The user's code (for context-aware hints)
+ * Match a caught Error to the teaching catalog.
+ * @param {Error}  error
+ * @param {string} language   'javascript' | 'typescript'
+ * @param {string} sourceCode user's code (for context hints)
  * @returns {{ raw: string, teachable: string|null, code: string|null }}
  */
 export function matchError(error, language = 'javascript', sourceCode = '') {
-  // Phase 3 will implement full catalog matching.
-  // For now, return the raw message only.
-  return {
-    raw:       error.message,
-    teachable: null,
-    code:      null,
-  };
+  const catalog = language === 'typescript' ? TSErrors : JSErrors;
+  const msg = error.message || String(error);
+
+  for (const entry of catalog) {
+    if (entry.pattern && entry.pattern.test(msg)) {
+      let teachable = entry.explanation || null;
+
+      // Simple context hint: if source contains the likely symbol, mention it
+      if (teachable && entry.extractSymbol) {
+        const sym = entry.extractSymbol(msg, sourceCode);
+        if (sym) teachable = teachable.replace('{symbol}', `"${sym}"`);
+      }
+
+      return { raw: msg, teachable, code: entry.code || null };
+    }
+  }
+
+  // No catalog match — return raw only
+  return { raw: msg, teachable: null, code: null };
 }
 
 /**
- * Render a teachable error block into the terminal output element.
- * @param {HTMLElement} outputEl  - The #terminal-output div
- * @param {object} matched        - Result from matchError()
+ * Render error output into the terminal output element.
+ * Always renders the raw error; adds teachable block if available.
  */
 export function renderErrorBlock(outputEl, matched) {
   // Raw error line
   const errLine = document.createElement('span');
-  errLine.className   = 't-line t-error';
+  errLine.className = 't-line t-error-raw';
   errLine.textContent = matched.raw;
   outputEl.appendChild(errLine);
 
-  // Teachable expansion (if available)
+  // Teachable expansion
   if (matched.teachable) {
     const block = document.createElement('div');
     block.className = 't-teachable';
     block.innerHTML = `
-      <div class="teachable-header">
-        ${matched.code ? `[${matched.code}]` : ''} Teaching Moment
-      </div>
-      <div class="teachable-msg">${escapeHtml(matched.teachable)}</div>
+      <div class="teachable-header">${matched.code ? `[${matched.code}] ` : ''}Teaching Moment</div>
+      <div class="teachable-msg">${escHtml(matched.teachable)}</div>
     `;
     outputEl.appendChild(block);
   }
@@ -56,11 +61,9 @@ export function renderErrorBlock(outputEl, matched) {
   outputEl.scrollTop = outputEl.scrollHeight;
 }
 
-// ── Utility ───────────────────────────────────────────────────
-function escapeHtml(str) {
-  return str
+function escHtml(str) {
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/>/g, '&gt;');
 }
